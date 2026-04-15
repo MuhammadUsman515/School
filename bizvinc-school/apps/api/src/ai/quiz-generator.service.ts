@@ -30,7 +30,7 @@ export class QuizGeneratorService {
 
   constructor(private prisma: PrismaService) {
     this.openai = new OpenAI({
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
+      apiKey: process.env.AZURE_OPENAI_API_KEY || 'sk-placeholder',
       baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
       defaultQuery: { 'api-version': process.env.OPENAI_API_VERSION || '2024-02-01' },
       defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_API_KEY },
