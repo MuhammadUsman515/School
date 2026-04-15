@@ -13,8 +13,8 @@ export class StaffService {
       ...(search
         ? {
             OR: [
-              { firstName: { contains: search, mode: 'insensitive' as const } },
-              { lastName: { contains: search, mode: 'insensitive' as const } },
+              { user: { firstName: { contains: search, mode: 'insensitive' as const } } },
+              { user: { lastName: { contains: search, mode: 'insensitive' as const } } },
               { employeeId: { contains: search, mode: 'insensitive' as const } },
             ],
           }
@@ -26,8 +26,10 @@ export class StaffService {
           where,
           skip: (page - 1) * limit,
           take: limit,
-          orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
-          include: { user: { select: { email: true, avatarUrl: true } } },
+          orderBy: { employeeId: 'asc' },
+          include: {
+            user: { select: { email: true, avatarUrl: true, firstName: true, lastName: true, phone: true } },
+          },
         }),
         tx.staff.count({ where }),
       ]);
@@ -41,20 +43,18 @@ export class StaffService {
       tx.staff.findFirst({
         where: { id, tenantId },
         include: {
-          user: { select: { email: true, avatarUrl: true } },
-          subjects: { select: { name: true, color: true } },
+          user: { select: { email: true, avatarUrl: true, firstName: true, lastName: true, phone: true } },
         },
       }),
     );
   }
 
   async create(tenantId: string, dto: CreateStaffDto) {
-    const { email, ...rest } = dto;
     return this.prisma.forTenant(tenantId, async (tx) => {
       const user = await tx.user.create({
         data: {
           tenantId,
-          email,
+          email: dto.email,
           firstName: dto.firstName,
           lastName: dto.lastName,
           role: 'TEACHER',
@@ -62,15 +62,30 @@ export class StaffService {
         },
       });
       return tx.staff.create({
-        data: { tenantId, userId: user.id, status: 'ACTIVE', ...rest },
+        data: {
+          tenantId,
+          userId: user.id,
+          employeeId: dto.employeeId ?? `EMP-${Date.now()}`,
+          designation: dto.designation ?? 'Teacher',
+          department: dto.department,
+          specializations: dto.specialization ? [dto.specialization] : [],
+          joiningDate: dto.dateOfJoining ? new Date(dto.dateOfJoining) : new Date(),
+          status: 'ACTIVE',
+        },
       });
     });
   }
 
   async update(tenantId: string, id: string, dto: Partial<CreateStaffDto>) {
-    const { email: _email, ...rest } = dto;
     return this.prisma.forTenant(tenantId, (tx) =>
-      tx.staff.update({ where: { id }, data: rest }),
+      tx.staff.update({
+        where: { id },
+        data: {
+          ...(dto.designation ? { designation: dto.designation } : {}),
+          ...(dto.department ? { department: dto.department } : {}),
+          ...(dto.dateOfJoining ? { joiningDate: new Date(dto.dateOfJoining) } : {}),
+        },
+      }),
     );
   }
 

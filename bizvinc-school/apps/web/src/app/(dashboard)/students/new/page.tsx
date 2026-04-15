@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import { getRiskColor } from '@/lib/utils';
 import { Brain, AlertTriangle, TrendingDown, Loader2, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';

@@ -21,7 +21,7 @@ export class AcademicYearsService {
       tx.academicYear.findFirst({
         where: { tenantId, isCurrent: true },
         include: {
-          terms: { where: { isCurrent: true } },
+          terms: { orderBy: { startDate: 'asc' } },
         },
       }),
     );
@@ -29,7 +29,6 @@ export class AcademicYearsService {
 
   async create(tenantId: string, dto: CreateAcademicYearDto) {
     if (dto.isCurrent) {
-      // Unset other current years
       await this.prisma.forTenant(tenantId, (tx) =>
         tx.academicYear.updateMany({
           where: { tenantId, isCurrent: true },
@@ -41,34 +40,30 @@ export class AcademicYearsService {
       tx.academicYear.create({
         data: {
           tenantId,
-          ...dto,
+          name: dto.name,
           startDate: new Date(dto.startDate),
           endDate: new Date(dto.endDate),
+          isCurrent: dto.isCurrent ?? false,
         },
       }),
     );
   }
 
   async addTerm(tenantId: string, academicYearId: string, dto: CreateTermDto) {
-    if (dto.isCurrent) {
-      await this.prisma.forTenant(tenantId, (tx) =>
-        tx.term.updateMany({
-          where: { academicYearId, isCurrent: true },
-          data: { isCurrent: false },
-        }),
-      );
-    }
-    return this.prisma.forTenant(tenantId, (tx) =>
-      tx.term.create({
+    // Get the next order number
+    return this.prisma.forTenant(tenantId, async (tx) => {
+      const existingTerms = await tx.term.findMany({ where: { academicYearId, tenantId } });
+      return tx.term.create({
         data: {
           academicYearId,
           tenantId,
-          ...dto,
+          name: dto.name,
           startDate: new Date(dto.startDate),
           endDate: new Date(dto.endDate),
+          order: existingTerms.length + 1,
         },
-      }),
-    );
+      });
+    });
   }
 
   async setCurrentYear(tenantId: string, id: string) {

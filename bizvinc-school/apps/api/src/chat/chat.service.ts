@@ -12,7 +12,7 @@ export class ChatService {
         data: {
           tenantId,
           senderId,
-          receiverId: dto.receiverId,
+          recipientId: dto.recipientId,
           content: dto.content,
         },
         include: {
@@ -26,8 +26,8 @@ export class ChatService {
     const where = {
       tenantId,
       OR: [
-        { senderId: userId, receiverId: otherId },
-        { senderId: otherId, receiverId: userId },
+        { senderId: userId, recipientId: otherId },
+        { senderId: otherId, recipientId: userId },
       ],
     };
     const [data, total] = await this.prisma.forTenant(tenantId, async (tx) => {
@@ -36,7 +36,7 @@ export class ChatService {
           where,
           skip: (page - 1) * limit,
           take: limit,
-          orderBy: { sentAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
           include: {
             sender: { select: { firstName: true, lastName: true, avatarUrl: true } },
           },
@@ -53,19 +53,18 @@ export class ChatService {
       const messages = await tx.chatMessage.findMany({
         where: {
           tenantId,
-          OR: [{ senderId: userId }, { receiverId: userId }],
+          OR: [{ senderId: userId }, { recipientId: userId }],
         },
-        orderBy: { sentAt: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: {
           sender: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-          receiver: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
         },
       });
 
       // Deduplicate to one message per conversation partner
       const seen = new Set<string>();
       return messages.filter((m) => {
-        const partnerId = m.senderId === userId ? m.receiverId : m.senderId;
+        const partnerId = m.senderId === userId ? m.recipientId : m.senderId;
         if (!partnerId || seen.has(partnerId)) return false;
         seen.add(partnerId);
         return true;
@@ -76,7 +75,7 @@ export class ChatService {
   async markRead(tenantId: string, userId: string, senderId: string) {
     return this.prisma.forTenant(tenantId, (tx) =>
       tx.chatMessage.updateMany({
-        where: { tenantId, senderId, receiverId: userId, isRead: false },
+        where: { tenantId, senderId, recipientId: userId, isRead: false },
         data: { isRead: true },
       }),
     );

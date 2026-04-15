@@ -14,7 +14,7 @@ interface GenerateQuizParams {
   subjectId?: string;
 }
 
-interface GeneratedQuestion {
+export interface GeneratedQuestion {
   question: string;
   questionType: QuestionType;
   options?: string[];

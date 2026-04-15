@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { FeeFrequency, FeeType } from '@prisma/client';
 import { CreateFeeStructureDto } from './dto/create-fee-structure.dto';
 
 @Injectable()
 export class FeeStructuresService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(tenantId: string, classId?: string) {
+  async findAll(tenantId: string, _classId?: string) {
     return this.prisma.forTenant(tenantId, (tx) =>
       tx.feeStructure.findMany({
-        where: { tenantId, isActive: true, ...(classId ? { classId } : {}) },
+        where: { tenantId, isActive: true },
         orderBy: [{ feeType: 'asc' }, { name: 'asc' }],
-        include: { class: { select: { name: true } }, academicYear: { select: { name: true } } },
       }),
     );
   }
@@ -19,14 +19,31 @@ export class FeeStructuresService {
   async create(tenantId: string, dto: CreateFeeStructureDto) {
     return this.prisma.forTenant(tenantId, (tx) =>
       tx.feeStructure.create({
-        data: { tenantId, isActive: true, ...dto },
+        data: {
+          tenantId,
+          name: dto.name,
+          amount: dto.amount,
+          feeType: dto.feeType as FeeType,
+          frequency: dto.frequency as FeeFrequency,
+          description: dto.description,
+          isActive: true,
+        },
       }),
     );
   }
 
   async update(tenantId: string, id: string, dto: Partial<CreateFeeStructureDto>) {
     return this.prisma.forTenant(tenantId, (tx) =>
-      tx.feeStructure.update({ where: { id }, data: dto }),
+      tx.feeStructure.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined ? { name: dto.name } : {}),
+          ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
+          ...(dto.feeType !== undefined ? { feeType: dto.feeType as FeeType } : {}),
+          ...(dto.frequency !== undefined ? { frequency: dto.frequency as FeeFrequency } : {}),
+          ...(dto.description !== undefined ? { description: dto.description } : {}),
+        },
+      }),
     );
   }
 

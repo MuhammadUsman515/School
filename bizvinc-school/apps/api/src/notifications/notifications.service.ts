@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, Prisma } from '@prisma/client';
 
 interface SendNotificationDto {
   title: string;
@@ -32,7 +32,7 @@ export class NotificationsService {
           title: dto.title,
           body: dto.body,
           type: dto.type,
-          data: dto.data ?? {},
+          data: (dto.data ?? {}) as Prisma.InputJsonValue,
           channel: 'IN_APP',
           sentAt: new Date(),
         },

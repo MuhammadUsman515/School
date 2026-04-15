@@ -10,7 +10,7 @@ export class PaymentsService {
 
   constructor(private prisma: PrismaService) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-      apiVersion: '2024-12-18.acacia',
+      apiVersion: '2023-10-16',
     });
   }
 
@@ -111,7 +111,7 @@ export class PaymentsService {
     }
 
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.CheckoutSession;
+      const session = event.data.object as Stripe.Checkout.Session;
       const paymentId = session.metadata?.paymentId;
       if (!paymentId) return;
 

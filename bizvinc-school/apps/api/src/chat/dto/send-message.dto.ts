@@ -3,5 +3,5 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SendMessageDto {
   @ApiProperty() @IsString() content: string;
-  @ApiPropertyOptional() @IsOptional() @IsUUID() receiverId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsUUID() recipientId?: string;
 }

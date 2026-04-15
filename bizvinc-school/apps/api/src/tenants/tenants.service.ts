@@ -5,9 +5,9 @@ export class UpdateTenantDto {
   name?: string;
   primaryColor?: string;
   logoUrl?: string;
-  address?: string;
-  phone?: string;
-  website?: string;
+  country?: string;
+  currency?: string;
+  timezone?: string;
 }
 
 @Injectable()
@@ -27,7 +27,7 @@ export class TenantsService {
       this.prisma.student.count({ where: { tenantId, status: 'ACTIVE' } }),
       this.prisma.staff.count({ where: { tenantId, status: 'ACTIVE' } }),
       this.prisma.invoice.count({ where: { tenantId, status: { in: ['PENDING', 'PARTIAL', 'OVERDUE'] } } }),
-      this.prisma.class.count({ where: { tenantId, isActive: true } }),
+      this.prisma.class.count({ where: { tenantId } }),
     ]);
     return { students, staff, activeInvoices, classes };
   }

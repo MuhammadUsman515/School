@@ -7,7 +7,7 @@ export class ExamsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(tenantId: string, status?: string, page = 1, limit = 20) {
-    const where = { tenantId, ...(status ? { status } : {}) };
+    const where = { tenantId, ...(status ? { status: status as never } : {}) };
     const [data, total] = await this.prisma.forTenant(tenantId, async (tx) => {
       const [d, t] = await Promise.all([
         tx.exam.findMany({
@@ -16,8 +16,7 @@ export class ExamsService {
           take: limit,
           orderBy: { createdAt: 'desc' },
           include: {
-            class: { select: { name: true } },
-            subject: { select: { name: true, color: true } },
+            term: { select: { name: true } },
           },
         }),
         tx.exam.count({ where }),
@@ -32,11 +31,10 @@ export class ExamsService {
       tx.exam.findFirst({
         where: { id, tenantId },
         include: {
-          class: true,
-          subject: true,
+          term: true,
           questions: {
             orderBy: { order: 'asc' },
-            include: { questionBank: true },
+            include: { question: true },
           },
           results: {
             include: { student: { select: { firstName: true, lastName: true, admissionNumber: true } } },
@@ -47,20 +45,47 @@ export class ExamsService {
   }
 
   async create(tenantId: string, dto: CreateExamDto) {
-    return this.prisma.forTenant(tenantId, (tx) =>
-      tx.exam.create({
-        data: { tenantId, status: 'DRAFT', ...dto, scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined },
-      }),
-    );
+    const startTime = dto.scheduledAt ? new Date(dto.scheduledAt) : new Date();
+    const endTime = new Date(startTime.getTime() + (dto.durationMinutes ?? 60) * 60 * 1000);
+
+    return this.prisma.forTenant(tenantId, async (tx) => {
+      // Get or create a term to associate with
+      let termId = dto.termId;
+      if (!termId) {
+        const academicYear = await tx.academicYear.findFirst({ where: { tenantId, isCurrent: true } });
+        if (academicYear) {
+          const term = await tx.term.findFirst({ where: { tenantId, academicYearId: academicYear.id } });
+          termId = term?.id;
+        }
+      }
+      if (!termId) throw new Error('No term available. Please create an academic year and term first.');
+
+      return tx.exam.create({
+        data: {
+          tenantId,
+          termId,
+          classId: dto.classId,
+          subjectId: dto.subjectId,
+          title: dto.title,
+          description: dto.instructions,
+          totalMarks: dto.totalMarks ?? 100,
+          passingMarks: dto.passingMarks ?? 40,
+          durationMinutes: dto.durationMinutes ?? 60,
+          startTime,
+          endTime,
+          status: 'DRAFT',
+        },
+      });
+    });
   }
 
   async addQuestions(tenantId: string, examId: string, dto: AddExamQuestionsDto) {
     return this.prisma.forTenant(tenantId, async (tx) => {
       const exam = await tx.exam.findFirst({ where: { id: examId, tenantId }, include: { questions: true } });
       const startOrder = exam?.questions.length ?? 0;
-      const questions = dto.questionBankItemIds.map((qbId, i) => ({
+      const questions = dto.questionBankItemIds.map((qId, i) => ({
         examId,
-        questionBankItemId: qbId,
+        questionId: qId,
         order: startOrder + i + 1,
         marks: 1,
       }));
@@ -78,8 +103,13 @@ export class ExamsService {
     return this.prisma.forTenant(tenantId, (tx) =>
       tx.examResult.upsert({
         where: { examId_studentId: { examId, studentId: dto.studentId } },
-        create: { examId, studentId: dto.studentId, marksObtained: dto.marksObtained, remarks: dto.remarks },
-        update: { marksObtained: dto.marksObtained, remarks: dto.remarks },
+        create: {
+          examId,
+          studentId: dto.studentId,
+          answers: {},
+          score: dto.marksObtained,
+        },
+        update: { score: dto.marksObtained },
       }),
     );
   }

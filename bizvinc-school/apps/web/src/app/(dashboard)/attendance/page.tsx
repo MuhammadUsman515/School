@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -26,16 +26,19 @@ export default function AttendancePage() {
     queryFn: () => api.get('/classes').then((r) => r.data),
   });
 
-  const { data: classData, isLoading } = useQuery({
+  const { data: classData, isLoading } = useQuery<{ student: { id: string; firstName: string; lastName: string; admissionNumber: string } }[]>({
     queryKey: ['class-students', selectedClass],
     queryFn: () => api.get(`/classes/${selectedClass}/students`).then((r) => r.data),
     enabled: !!selectedClass,
-    onSuccess: (data: { student: { id: string } }[]) => {
-      const initial: Record<string, AttendanceStatus> = {};
-      data.forEach((s) => { initial[s.student.id] = 'PRESENT'; });
-      setRecords(initial);
-    },
   });
+
+  useEffect(() => {
+    if (classData) {
+      const initial: Record<string, AttendanceStatus> = {};
+      classData.forEach((s) => { initial[s.student.id] = 'PRESENT'; });
+      setRecords(initial);
+    }
+  }, [classData]);
 
   const mutation = useMutation({
     mutationFn: (payload: unknown) => api.post('/attendance', payload),

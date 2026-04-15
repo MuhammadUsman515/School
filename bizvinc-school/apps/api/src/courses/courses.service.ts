@@ -20,7 +20,7 @@ export class CoursesService {
           orderBy: { createdAt: 'desc' },
           include: {
             subject: { select: { name: true, color: true } },
-            teacher: { select: { firstName: true, lastName: true } },
+            teacher: { include: { user: { select: { firstName: true, lastName: true } } } },
             _count: { select: { modules: true, enrollments: true } },
           },
         }),
@@ -29,9 +29,9 @@ export class CoursesService {
       return [d, t];
     });
     return {
-      data: data.map((c: Record<string, unknown> & { _count: { modules: number; enrollments: number } }) => ({
+      data: data.map((c) => ({
         ...c,
-        totalLessons: c._count.modules,
+        totalModules: c._count.modules,
         enrolledCount: c._count.enrollments,
       })),
       total,
@@ -47,7 +47,7 @@ export class CoursesService {
         where: { id, tenantId },
         include: {
           subject: true,
-          teacher: { select: { firstName: true, lastName: true } },
+          teacher: { include: { user: { select: { firstName: true, lastName: true } } } },
           modules: {
             orderBy: { order: 'asc' },
             include: {
@@ -79,9 +79,37 @@ export class CoursesService {
   }
 
   async create(tenantId: string, dto: CreateCourseDto) {
-    return this.prisma.forTenant(tenantId, (tx) =>
-      tx.course.create({ data: { tenantId, ...dto } }),
-    );
+    return this.prisma.forTenant(tenantId, async (tx) => {
+      // Resolve required fields: teacherId, subjectId, academicYearId
+      let teacherId = dto.teacherId;
+      if (!teacherId) {
+        const staff = await tx.staff.findFirst({ where: { tenantId, status: 'ACTIVE' } });
+        teacherId = staff?.id;
+      }
+      if (!teacherId) throw new Error('No active staff member found to assign as teacher');
+
+      let subjectId = dto.subjectId;
+      if (!subjectId) {
+        const subject = await tx.subject.findFirst({ where: { tenantId } });
+        subjectId = subject?.id;
+      }
+      if (!subjectId) throw new Error('No subject found. Please create a subject first.');
+
+      const academicYear = await tx.academicYear.findFirst({ where: { tenantId, isCurrent: true } })
+        ?? await tx.academicYear.findFirst({ where: { tenantId } });
+      if (!academicYear) throw new Error('No academic year found. Please create one first.');
+
+      return tx.course.create({
+        data: {
+          tenantId,
+          title: dto.title,
+          description: dto.description,
+          subjectId,
+          teacherId,
+          academicYearId: academicYear.id,
+        },
+      });
+    });
   }
 
   async addModule(tenantId: string, courseId: string, dto: CreateModuleDto) {
@@ -92,7 +120,16 @@ export class CoursesService {
 
   async addLesson(tenantId: string, moduleId: string, dto: CreateLessonDto) {
     return this.prisma.forTenant(tenantId, (tx) =>
-      tx.lesson.create({ data: { moduleId, ...dto } }),
+      tx.lesson.create({
+        data: {
+          moduleId,
+          title: dto.title,
+          content: dto.content,
+          videoUrl: dto.videoUrl,
+          duration: dto.durationMinutes,
+          order: dto.order,
+        },
+      }),
     );
   }
 

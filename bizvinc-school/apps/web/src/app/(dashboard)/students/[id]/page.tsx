@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import { formatDate, formatCurrency, getRiskColor, getInitials } from '@/lib/utils';
 import { ArrowLeft, Mail, Phone, BookOpen, CreditCard, Calendar, AlertTriangle } from 'lucide-react';
 

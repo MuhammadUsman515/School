@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import { BookOpen, Play, Users, Clock, ChevronRight, Search } from 'lucide-react';
 
 export default function LMSPage() {

@@ -7,23 +7,40 @@ export class AdmissionsService {
   constructor(private prisma: PrismaService) {}
 
   async create(tenantId: string, dto: CreateAdmissionDto) {
+    const applicationNumber = `ADM-${Date.now()}`;
+    const nameParts = dto.applicantName.trim().split(' ');
+    const firstName = nameParts[0] ?? dto.applicantName;
+    const lastName = nameParts.slice(1).join(' ') || '-';
+
     return this.prisma.forTenant(tenantId, (tx) =>
       tx.admission.create({
-        data: { tenantId, ...dto, appliedAt: new Date() },
+        data: {
+          tenantId,
+          applicationNumber,
+          firstName,
+          lastName,
+          dateOfBirth: new Date('2000-01-01'),
+          gender: 'OTHER',
+          guardianName: dto.applicantName,
+          guardianEmail: dto.applicantEmail,
+          guardianPhone: dto.applicantPhone ?? '',
+          appliedGrade: dto.appliedGrade ?? '',
+          academicYearId: dto.academicYearId,
+          notes: dto.notes,
+        },
       }),
     );
   }
 
   async findAll(tenantId: string, status?: string, page = 1, limit = 20) {
-    const where = { tenantId, ...(status ? { status } : {}) };
+    const where = { tenantId, ...(status ? { status: status as never } : {}) };
     const [data, total] = await this.prisma.forTenant(tenantId, async (tx) => {
       const [d, t] = await Promise.all([
         tx.admission.findMany({
           where,
           skip: (page - 1) * limit,
           take: limit,
-          orderBy: { appliedAt: 'desc' },
-          include: { academicYear: { select: { name: true } } },
+          orderBy: { createdAt: 'desc' },
         }),
         tx.admission.count({ where }),
       ]);
@@ -37,7 +54,7 @@ export class AdmissionsService {
     const counts: Record<string, number> = {};
     await this.prisma.forTenant(tenantId, async (tx) => {
       for (const s of statuses) {
-        counts[s] = await tx.admission.count({ where: { tenantId, status: s } });
+        counts[s] = await tx.admission.count({ where: { tenantId, status: s as never } });
       }
     });
     return counts;

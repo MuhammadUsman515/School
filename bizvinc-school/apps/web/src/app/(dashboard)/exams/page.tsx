@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { ClipboardList, Calendar, Clock, Users } from 'lucide-react';
 
