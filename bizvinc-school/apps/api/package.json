@@ -24,7 +24,7 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "passport-google-oauth20": "^2.0.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "class-validator": "^0.14.1",
     "class-transformer": "^0.5.1",
     "ioredis": "^5.3.2",
@@ -53,7 +53,7 @@
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",
     "@nestjs/testing": "^10.3.0",
-    "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/compression": "^1.7.5",
     "@types/multer": "^1.4.11",
     "@types/nodemailer": "^6.4.14",
