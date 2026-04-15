@@ -7,21 +7,25 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   Home, Users, ClipboardCheck, BookOpen, DollarSign,
   GraduationCap, MessageSquare, UserPlus, Calendar, Brain,
-  ClipboardList, LogOut,
+  ClipboardList, LogOut, Briefcase, School, FileText, Settings,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/',             label: 'Dashboard',    icon: Home,          roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
   { href: '/students',     label: 'Students',     icon: Users,         roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
+  { href: '/staff',        label: 'Staff',        icon: Briefcase,     roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
+  { href: '/classes',      label: 'Classes',      icon: School,        roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
   { href: '/attendance',   label: 'Attendance',   icon: ClipboardCheck, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
   { href: '/grades',       label: 'Gradebook',    icon: GraduationCap, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
   { href: '/exams',        label: 'Exams',        icon: ClipboardList, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT'] },
+  { href: '/assignments',  label: 'Assignments',  icon: FileText,      roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT'] },
   { href: '/fees',         label: 'Fees',         icon: DollarSign,    roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'FINANCE_OFFICER', 'PARENT'] },
   { href: '/lms',          label: 'Courses',      icon: BookOpen,      roles: ['SCHOOL_ADMIN', 'TEACHER', 'STUDENT'] },
   { href: '/timetable',    label: 'Timetable',    icon: Calendar,      roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
   { href: '/communication',label: 'Communication',icon: MessageSquare, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'PARENT'] },
   { href: '/admissions',   label: 'Admissions',   icon: UserPlus,      roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
   { href: '/ai',           label: 'AI Analytics', icon: Brain,         roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
+  { href: '/settings',     label: 'Settings',     icon: Settings,      roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
 ];
 
 export function Sidebar() {
