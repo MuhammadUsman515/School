@@ -242,10 +242,10 @@ async function main() {
             dueDate,
             paidAt: isPaid ? new Date(dueDate.getTime() + Math.random() * 10 * 86400000) : null,
             items: {
-              create: feeStructures.map((f: { id: string; name: string; amount: number }) => ({
+              create: feeStructures.map((f) => ({
                 feeStructureId: f.id,
                 description: f.name,
-                amount: f.amount,
+                amount: Number(f.amount),
               })),
             },
           },
