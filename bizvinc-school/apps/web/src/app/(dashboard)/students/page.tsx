@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 import { getRiskColor } from '@/lib/utils';
 import { Search, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';

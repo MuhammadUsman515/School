@@ -6,20 +6,22 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Home, Users, ClipboardCheck, BookOpen, DollarSign,
-  GraduationCap, MessageSquare, UserPlus, Calendar, Brain, Settings, LogOut,
+  GraduationCap, MessageSquare, UserPlus, Calendar, Brain,
+  ClipboardList, LogOut,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Dashboard', icon: Home, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
-  { href: '/students', label: 'Students', icon: Users, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
-  { href: '/attendance', label: 'Attendance', icon: ClipboardCheck, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
-  { href: '/grades', label: 'Gradebook', icon: GraduationCap, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
-  { href: '/fees', label: 'Fees', icon: DollarSign, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'FINANCE_OFFICER', 'PARENT'] },
-  { href: '/lms', label: 'Courses', icon: BookOpen, roles: ['SCHOOL_ADMIN', 'TEACHER', 'STUDENT'] },
-  { href: '/communication', label: 'Communication', icon: MessageSquare, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'PARENT'] },
-  { href: '/admissions', label: 'Admissions', icon: UserPlus, roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
-  { href: '/timetable', label: 'Timetable', icon: Calendar, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
-  { href: '/ai', label: 'AI Analytics', icon: Brain, roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
+  { href: '/',             label: 'Dashboard',    icon: Home,          roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
+  { href: '/students',     label: 'Students',     icon: Users,         roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
+  { href: '/attendance',   label: 'Attendance',   icon: ClipboardCheck, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER'] },
+  { href: '/grades',       label: 'Gradebook',    icon: GraduationCap, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
+  { href: '/exams',        label: 'Exams',        icon: ClipboardList, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT'] },
+  { href: '/fees',         label: 'Fees',         icon: DollarSign,    roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'FINANCE_OFFICER', 'PARENT'] },
+  { href: '/lms',          label: 'Courses',      icon: BookOpen,      roles: ['SCHOOL_ADMIN', 'TEACHER', 'STUDENT'] },
+  { href: '/timetable',    label: 'Timetable',    icon: Calendar,      roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'STUDENT', 'PARENT'] },
+  { href: '/communication',label: 'Communication',icon: MessageSquare, roles: ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'PARENT'] },
+  { href: '/admissions',   label: 'Admissions',   icon: UserPlus,      roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
+  { href: '/ai',           label: 'AI Analytics', icon: Brain,         roles: ['SCHOOL_ADMIN', 'PRINCIPAL'] },
 ];
 
 export function Sidebar() {
