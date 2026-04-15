@@ -1,0 +1,22 @@
+{
+  "name": "bizvinc-school",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "db:migrate": "pnpm --filter @bizvinc/database migrate",
+    "db:generate": "pnpm --filter @bizvinc/database generate",
+    "db:seed": "pnpm --filter @bizvinc/database seed",
+    "db:studio": "pnpm --filter @bizvinc/database studio"
+  },
+  "devDependencies": {
+    "turbo": "latest",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
